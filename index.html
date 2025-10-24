@@ -2,7 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+
 <title>SHIP DB</title>
 <style>
   /* Diseño base */
@@ -154,27 +155,38 @@
     }
   }
 
-  /* Adaptación extra para pantallas muy pequeñas (celulares chicos) */
-  @media (max-width: 480px) {
-    .titulo {
-      font-size: 16px;
-    }
-
-    .fila label {
-      font-size: 14px;
-    }
-
-    .fila input,
-    .fila select {
-      font-size: 14px;
-      padding: 7px;
-    }
-
-    .btn {
-      font-size: 14px;
-      padding: 9px;
-    }
+ /* ===== Ajustes extra para móviles pequeños ===== */
+@media (max-width: 380px) {
+  .contenedor {
+    padding: 8px;
   }
+
+  .fila label {
+    font-size: 13px;
+  }
+
+  .fila input,
+  .fila select {
+    font-size: 13px;
+    padding: 6px;
+  }
+
+  h1 {
+    font-size: 1.2em;
+  }
+
+  .btn {
+    font-size: 13px;
+    padding: 8px;
+  }
+}
+
+/* Evita desbordes horizontales en móviles */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 </style>
 </head>
 <body>
