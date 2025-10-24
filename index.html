@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SHIP DB</title>
+<style>
+  body{font-family:'Poppins',sans-serif;background:#f4f8fb;color:#012a4a;margin:0;padding:20px}
+  h1{text-align:center;color:#0f6fc6}
+  .contenedor{max-width:900px;margin:20px auto;background:#fff;border-radius:10px;padding:20px;box-shadow:0 4px 15px rgba(0,0,0,0.08)}
+  .titulo{font-weight:700;font-size:18px;color:#0f6fc6;border-bottom:2px solid #e0efff;padding-bottom:6px;margin-top:18px}
+  .fila{display:flex;gap:12px;align-items:center;margin:10px 0}
+  .fila label{flex:0 0 220px;font-weight:600}
+  .fila input,.fila select{flex:1;padding:8px;border-radius:6px;border:1px solid #ccc;text-align:center}
+  .resultado{margin-top:18px;background:#e8f3ff;padding:14px;border-radius:10px}
+  .codigo{font-family:monospace;font-size:16px;color:#0f4a8a;word-break:break-word;white-space:pre-wrap}
+  .detalle{margin-top:8px;font-size:14px;color:#01335d}
+  .btn{background:#0f6fc6;color:#fff;border:0;padding:10px 14px;border-radius:8px;cursor:pointer}
+  .btn:active{transform:translateY(1px)}
+</style>
+</head>
+<body>
+<h1>SHIP DB</h1>
+
+<div class="contenedor">
+  <!-- Encabezado y datos básicos -->
+  <div class="titulo">Encabezado SHIP</div>
+  <div class="fila"><label>Inicio:</label><input id="sigla" value="BBXX" readonly></div>
+  <div class="fila"><label>Sigla Buque:</label><input id="estacion" maxlength="4" placeholder="Ej: SCQQ" style="text-transform:uppercase"></div>
+  <div class="fila"><label>Día (DD):</label><input id="dia" type="number" min="1" max="31"></div>
+  <div class="fila"><label>Hora UTC (HH):</label><input id="hora" type="number" min="0" max="23"></div>
+  <div class="fila"><label>Indicador de viento:</label>
+    <select id="unidadViento">
+      <option value="0">0 – Viento estimado (m/s)</option>
+      <option value="1">1 – Viento anemómetro (m/s)</option>
+      <option value="3">3 – Viento estimado (nudos)</option>
+      <option value="4" selected>4 – Viento anemómetro (nudos)</option>
+    </select>
+  </div>
+
+  <!-- Latitud y longitud -->
+  <div class="titulo">Latitud</div>
+  <div class="fila"><label>Grados:</label><input id="latGrados" type="number" min="0" max="90" placeholder="Ej: 33"></div>
+  <div class="fila"><label>Minutos:</label><input id="latMinutos" type="number" min="0" max="59" placeholder="Ej: 44"></div>
+  <div class="fila"><label>Latitud codificada (99XXX):</label><input id="latitud" readonly></div>
+
+  <div class="titulo">Longitud</div>
+<div class="fila">
+  <label>Cuadrante:</label>
+  <select id="cuadrante">
+    <option value="1">1 – Noreste</option>
+    <option value="3">3 – Sureste</option>
+    <option value="5" selected>5 – Surweste</option>
+    <option value="7">7 – Norweste</option>
+  </select>
+</div>
+  <div class="fila"><label>Grados:</label><input id="lonGrados" type="number" min="0" max="180" placeholder="Ej: 85"></div>
+  <div class="fila"><label>Minutos:</label><input id="lonMinutos" type="number" min="0" max="59" placeholder="Ej: 55"></div>
+  <div class="fila"><label>Longitud codificada (50XXX):</label><input id="longitud" readonly></div>
+
+  <!-- Grupo 4 i B V V -->
+  <div class="titulo">Grupo Visibilidad</div>
+  <div class="fila"><label>Inclusión / omisión:</label>
+    <select id="incluido">
+      <option value="1">1 – Incluido (Con Fenómenos)</option>
+      <option value="2">2 – Omitido (Sin Fenómenos)</option>
+    </select>
+  </div>
+  <div class="fila"><label>Base nubosidad (1 díg):</label>
+    <select id="baseNube">
+      <option value="0">0.- 0 a 49 metros</option>
+      <option value="1">1.- 50 a 99 metros</option>
+      <option value="2">2.- 100 a 199 metros</option>
+      <option value="3">3.- 200 a 299 metros</option>
+      <option value="4">4.- 300 a 599 metros</option>
+      <option value="5">5.- 600 a 999 metros</option>
+      <option value="6">6.- 1000 a 1499 metros</option>
+      <option value="7">7.- 1500 a 1999 metros</option>
+      <option value="8">8.- 2000 a 2499 metros</option>
+      <option value="9">9.- 2500 mts. o más, o sin nubes</option>
+      <option value="/">/.- Altura de la base nubosa desconocida</option>
+    </select>
+  </div>
+  <div class="fila"><label>Visibilidad (2 dígitos):</label>
+    <select id="visibilidad">
+      <option value="90">90.- menos de 50 mts</option>
+      <option value="91">91.- 50 mts</option>
+      <option value="92">92.- 200 mts</option>
+      <option value="93">93.- 500 mts</option>
+      <option value="94">94.- 1 km</option>
+      <option value="95">95.- 2 km</option>
+      <option value="96">96.- 4 km</option>
+      <option value="97">97.- 10 km</option>
+      <option value="98">98.- 20 km</option>
+    </select>
+  </div>
+
+  <!-- NUEVA SECCIÓN 5: Octas, nubosidad total y Viento -->
+  <div class="titulo">Grupo Octas, Nubosidad total y Viento</div>
+  <div class="fila"><label>Octas total de nubes (0-8):</label><input id="vNubosidad" type="number" min="0" max="8" placeholder="Ej: 5"></div>
+  <div class="fila"><label>Dirección del viento:</label><input id="vDireccion" type="number" min="0" max="36" placeholder="Ej: 13"></div>
+  <div class="fila"><label>Intensidad del viento:</label><input id="vIntensidad" type="number" min="0" max="99" placeholder="Ej: 12"></div>
+
+  <!-- Temperaturas y humedad -->
+  <div class="titulo">Sección 1 y 2 — Temperaturas y humedad</div>
+  <div class="fila"><label>Temperatura seca (°C):</label><input id="tempSeco" type="number" step="0.1" placeholder="Ej: 8.8"></div>
+  <div class="fila"><label>Temperatura húmeda (°C):</label><input id="tempHumedo" type="number" step="0.1" placeholder="Ej: 8.0"></div>
+  <div class="fila"><label>Punto de rocío (°C):</label><input id="puntoRocio" readonly></div>
+  <div class="fila"><label>Humedad relativa (%):</label><input id="humRel" readonly></div>
+
+  <!-- Sección 1 y 2 — Presión y tendencia -->
+  <div class="titulo">Sección 3, 4 y 5 — Presión y tendencia</div>
+  <div class="fila"><label>Presión estación (hPa):</label><input id="presEst" type="number" step="0.1"></div>
+  <div class="fila"><label>Presión nivel mar (hPa):</label><input id="presMar" type="number" step="0.1"></div>
+  <div class="fila"><label>Tendencia (5a):</label>
+    <select id="tendTipo"><option value="2">2</option><option value="4">4</option><option value="7">7</option></select>
+  </div>
+  <div class="fila"><label>Valor cambio presión (hPa):</label><input id="tendValor" type="number" step="0.1"></div>
+
+<!-- Sección 7 — Tiempo Presente -->
+<div class="titulo">Sección 7 — Tiempo Presente</div>
+
+<!-- Tiempo presente -->
+<div class="fila">
+  <label>Tiempo presente:</label>
+  <select id="tiempoPresente">
+
+    <optgroup label="00–03 | Estado general del cielo">
+    <option value="00">00 – Estado del cielo no observado</option>
+    <option value="01">01 – Nubes en disminución</option>
+    <option value="02">02 – Cielo sin cambios</option>
+    <option value="03">03 – Nubosidad en aumento</option>
+    </optgroup>
+
+    <optgroup label="04–10 | Bruma, humo, polvo o arena">
+    <option value="04">04 – Visibilidad reducida por humo/ceniza</option>
+    <option value="05">05 – Visibilidad reducida por bruma (>1km)</option>
+    <option value="06">06 – Polvo en suspensión no levantado</option>
+    <option value="07">07 – Polvo/arena levantado sin torbellinos</option>
+    <option value="08">08 – Remolinos de polvo/arena sin tempestad</option>
+    <option value="09">09 – Tormenta de polvo o arena</option>
+    <option value="10">10 – Neblina (1-10 km)</option>
+    </optgroup>
+
+
+    <optgroup label="11–19 | Eventos sin precipitaciones">
+    <option value="11">11 – Niebla baja aislada (<1 km)</option>
+    <option value="12">12 – Niebla baja continua (<1 km)</option>
+    <option value="13">13 – Relámpagos visibles</option>
+    <option value="14">14 – Precipitación virga</option>
+    <option value="15">15 – Precipitación a >5 km</option>
+    <option value="16">16 – Precipitación cerca</option>
+    <option value="17">17 – Tormentas sin precipitación</option>
+    <option value="18">18 – Turbonadas visibles</option>
+    <option value="19">19 – Nubes embudo (tornado/tromba)</option>
+    </optgroup>
+
+    <optgroup label="20–29 | Precipitación dentro de la hora pasada, pero no al momento de la observación">
+    <option value="20">20 – Llovizna no congelada</option>
+    <option value="21">21 – Lluvia no congelada</option>
+    <option value="22">22 – Nieve</option>
+    <option value="23">23 – Lluvia y nieve</option>
+    <option value="24">24 – Lloviznas/lluvia congelada</option>
+    <option value="25">25 – Chubasco de lluvia</option>
+    <option value="26">26 – Chubasco de nieve o lluvia+nieve</option>
+    <option value="27">27 – Chubasco de granizo pequeño o lluvia+granizo</option>
+    <option value="28">28 – Niebla o niebla helada</option>
+    <option value="29">29 – Tormenta con/sin precipitación</option>
+    </optgroup>
+
+    <optgroup label="30–39 | Tormenta de polvo , tormenta de arena o ventisca">
+    <option value="30">30 – Tempestad de polvo/arena débil/moderada</option>
+    <option value="31">31 – Tempestad de polvo/arena sin cambio</option>
+    <option value="32">32 – Tempestad de polvo/arena aumentando</option>
+    <option value="33">33 – Tempestad fuerte disminuyendo</option>
+    <option value="34">34 – Tempestad fuerte sin cambio</option>
+    <option value="35">35 – Tempestad fuerte aumentando</option>
+    <option value="36">36 – Ventisca baja débil/moderada</option>
+    <option value="37">37 – Ventisca baja fuerte</option>
+    <option value="38">38 – Ventisca alta débil/moderada</option>
+    <option value="39">39 – Ventisca alta fuerte</option>
+    </optgroup>
+
+
+    <optgroup label="40–49 | Nieblas o nieblas congelantes">
+    <option value="40">40 – Niebla a distancia</option>
+    <option value="41">41 – Niebla aislada ha disminuido</option>
+    <option value="42">42 – Niebla cielo visible disminuyendo</option>
+    <option value="43">43 – Niebla cielo invisible disminuyendo</option>
+    <option value="44">44 – Niebla cielo visible sin cambio</option>
+    <option value="45">45 – Niebla cielo invisible sin cambio</option>
+    <option value="46">46 – Niebla cielo visible espesada</option>
+    <option value="47">47 – Niebla cielo invisible espesada</option>
+    <option value="48">48 – Niebla visible con escarcha</option>
+    <option value="49">49 – Niebla invisible con escarcha</option>
+    </optgroup>
+
+    <optgroup label="50–59 | Lloviznas">
+    <option value="50">50 – Llovizna débil intermitente</option>
+    <option value="51">51 – Llovizna débil continua</option>
+    <option value="52">52 – Llovizna moderada intermitente</option>
+    <option value="53">53 – Llovizna moderada continua</option>
+    <option value="54">54 – Llovizna fuerte intermitente</option>
+    <option value="55">55 – Llovizna fuerte continua</option>
+    <option value="56">56 – Llovizna débil congelada</option>
+    <option value="57">57 – Llovizna moderada/fuerte congelada</option>
+    <option value="58">58 – Llovizna y lluvia débil</option>
+    <option value="59">59 – Llovizna y lluvia moderada/fuerte</option>
+    </optgroup>
+
+    <optgroup label="60–69 | Lluvia">
+    <option value="60">60 – Lluvia débil intermitente</option>
+    <option value="61">61 – Lluvia débil continua</option>
+    <option value="62">62 – Lluvia moderada intermitente</option>
+    <option value="63">63 – Lluvia moderada continua</option>
+    <option value="64">64 – Lluvia fuerte intermitente</option>
+    <option value="65">65 – Lluvia fuerte continua</option>
+    <option value="66">66 – Lluvia débil congelada</option>
+    <option value="67">67 – Lluvia moderada/fuerte congelada</option>
+    <option value="68">68 – Lluvia y nieve débil</option>
+    <option value="69">69 – Lluvia y nieve moderada/fuerte</option>
+    </optgroup>
+
+    <optgroup label="70–79 | Nieve">
+    <option value="70">70 – Nieve débil intermitente</option>
+    <option value="71">71 – Nieve débil continua</option>
+    <option value="72">72 – Nieve moderada intermitente</option>
+    <option value="73">73 – Nieve moderada continua</option>
+    <option value="74">74 – Nieve densa intermitente</option>
+    <option value="75">75 – Nieve densa continua</option>
+    <option value="76">76 – Agujas de hielo</option>
+    <option value="77">77 – Nieve granulada</option>
+    <option value="78">78 – Cristales aislados de nieve</option>
+    <option value="79">79 – Cellisca o bolitas de hielo</option>
+    </optgroup>
+
+
+    <optgroup label="80–90 | Chubasco">
+    <option value="80">80 – Chubasco de lluvia débil</option>
+    <option value="81">81 – Chubasco de lluvia moderada/fuerte</option>
+    <option value="82">82 – Chubasco violento de lluvia</option>
+    <option value="83">83 – Chubasco débiles de lluvia y nieve</option>
+    <option value="84">84 – Chubasco moderados/fuertes de lluvia y nieve</option>
+    <option value="85">85 – Chubasco débiles de nieve</option>
+    <option value="86">86 – Chubasco moderados/fuertes de nieve</option>
+    <option value="87">87 – Chubasco débiles de granizo pequeño o nieve granulada</option>
+    <option value="88">88 – Chubasco moderados/fuertes granizo pequeño o nieve granulada</option>
+    <option value="89">89 – Chubasco débiles granizo con lluvia o nieve</option>
+    <option value="90">90 – Chubasco moderados/fuertes granizo con lluvia o nieve</option>
+    </optgroup>
+
+    <optgroup label="91–99 | Tormenta">
+    <option value="91">91 – Lluvia débil, tormenta eléctrica previa</option>
+    <option value="92">92 – Lluvia moderada/fuerte, tormenta eléctrica previa</option>
+    <option value="93">93 – Nieve o lluvia y nieve débiles, tormenta eléctrica previa</option>
+    <option value="94">94 – Nieve o lluvia y nieve moderados/fuertes, tormenta eléctrica previa</option>
+    <option value="95">95 – Tormenta eléctrica débil/moderada sin granizo</option>
+    <option value="96">96 – Tormenta eléctrica débil/moderada con granizo</option>
+    <option value="97">97 – Tormenta eléctrica fuerte sin granizo</option>
+    <option value="98">98 – Tormenta eléctrica + tempestad de polvo/arena</option>
+    <option value="99">99 – Tormenta eléctrica fuerte con granizo</option>
+    </optgroup>
+
+  </select>
+</div>
+
+<!-- Tiempo pasado 1 -->
+<div class="fila">
+  <label>Tiempo pasado 1:</label>
+  <select id="tiempoPasado1">
+    <option value="0">0 – Despejado</option>
+    <option value="1">1 – Nubosidad menos de la mitad</option>
+    <option value="2">2 – Nubes cubriendo más de la mitad del cielo</option>
+    <option value="3">3 – Tempestad de polvo, Arena O ventisca</option>
+    <option value="4">4 – Niebla , niebla helada Bruma Espesa (Vis menor a 1 km)</option>
+    <option value="5">5 – Llovizna</option>
+    <option value="6">6 – Lluvia</option>
+    <option value="7">7 – Nieve o aguanieve</option>
+    <option value="8">8 – Chubascos</option>
+    <option value="9">9 – Tormenta Eléctrica con o sin precipitaciones</option>
+    <!-- Puedes agregar más códigos -->
+  </select>
+</div>
+
+<!-- Tiempo pasado 2 -->
+<div class="fila">
+  <label>Tiempo pasado 2:</label>
+  <select id="tiempoPasado2">
+    <option value="0">0 – Despejado</option>
+    <option value="1">1 – Nubosidad menos de la mitad</option>
+    <option value="2">2 – Nubes cubriendo más de la mitad del cielo</option>
+    <option value="3">3 – Tempestad de polvo, Arena O ventisca</option>
+    <option value="4">4 – Niebla , niebla helada Bruma Espesa (Vis menor a 1 km)</option>
+    <option value="5">5 – Llovizna</option>
+    <option value="6">6 – Lluvia</option>
+    <option value="7">7 – Nieve o aguanieve</option>
+    <option value="8">8 – Chubascos</option>
+    <option value="9">9 – Tormenta Eléctrica con o sin precipitaciones</option>
+    <!-- Puedes agregar más códigos -->
+  </select>
+</div>
+
+
+<!-- Sección 8 — Nubosidad -->
+<div class="titulo">Sección 8 — Nubosidad</div>
+<div class="fila"><label>Nubosidad total (N):</label>
+  <select id="nubN">
+    <option value="0">0/8</option>
+    <option value="1">1/8</option>
+    <option value="2">2/8</option>
+    <option value="3">3/8</option>
+    <option value="4">4/8</option>
+    <option value="5">5/8</option>
+    <option value="6">6/8</option>
+    <option value="7">7/8</option>
+    <option value="8">8/8</option>
+    <option value="9">9 Cielo oscurecido. Imposible de estimar, Invisible por niebla, polvo o ventisca </option>
+    <option value="/">/ No se ha efectuado medición</option>
+  </select>
+</div>
+<div class="fila">
+  <label>Nubes bajas:</label>
+  <select id="NubesBajas">
+    <option value="0">0 – Sin nubes bajas</option>
+    <option value="1">1 – Cúmulos humilis o fractus sin desarrollo vertical </option>
+    <option value="2">2 – Cúmulos congestus o mediocres con moderado desarrollo vertical</option>
+    <option value="3">3 – Cúmulonimbus calvus sin yunque ni contorno definido</option>
+    <option value="4">4 – Stratocumulus cumulogenitus, Formado por dispersión de Cu</option>
+    <option value="5">5 – Stratocumulus</option>
+    <option value="6">6 – Stratus nebulosos, Capa continua</option>
+    <option value="7">7 – Fractustratus o fractuscúmulus de Mal Tiempo</option>
+    <option value="8">8 – Cúmulos y stratocúmulus con base a diferentes niveles</option>
+    <option value="9">9 – Cúmulonimbus capillatus, forma de yunque</option>
+    <option value="/">/ – Nubes bajas invisibles por oscurecimiento u obstáculos (niebla, polvo o arena</option>
+  </select>
+</div>
+
+<div class="fila">
+  <label>Nubes medias:</label>
+  <select id="NubesMedias">
+    <option value="0">0 – Sin nubes medias</option>
+    <option value="1">1 – Altostratus translúcidos</option>
+    <option value="2">2 – Altostratus opacus o nimbostratus</option>
+    <option value="3">3 – Altocúmulos translúcidos</option>
+    <option value="4">4 – Altocúmulos lenticulares, en bancos Y regulares o lenticulares</option>
+    <option value="5">5 – Altocúmulos translúcidos en bandas</option>
+    <option value="6">6 – Altocúmulos cúmulugenitus, formados por la extensión de Cu o Cb</option>
+    <option value="7">7 – Altocúmulos translúcidos u opacus, Formado en varias capas </option>
+    <option value="8">8 – Altocúmulos floccus o castellatus</option>
+    <option value="9">9 – Altocúmulos en un cielo caótico</option>
+    <option value="/">/ – Nubes medias invisibles por oscurecimiento u obstáculos (nubes bajas,etc.)</option>
+  </select>
+</div>
+
+
+<div class="fila">
+  <label>Nubes altas:</label>
+  <select id="NubesAltas">
+    <option value="0">0 – Sin nubes altas</option>
+    <option value="1">1 – Cirrus fibratus, tenue</option>
+    <option value="2">2 – Cirrus spissatus en bancos o franjas</option>
+    <option value="3">3 – Cirrus spissatus cumulonimbogenitus</option>
+    <option value="4">4 – Cirrus uncinus o filosus o ambos, extendiéndose gradualmente</option>
+    <option value="5">5 – Cirrus o cirroestratus en bandas invadiendo el cielo, menos de 45º sobre el horizonte</option>
+    <option value="6">6 – Cirrus o cirroestratus en bandas invadiendo el cielo, más de 45º sobre el horizonte</option>
+    <option value="7">7 – Cirrustratus cubriendo todo el cielo</option>
+    <option value="8">8 – Cirrustratus que no aumentan y no cubren todo el cielo</option>
+    <option value="9">9 – Cirrucúmulos</option>
+    <option value="/">/ – Nubes altas invisibles por oscurecimiento o obstáculos (nubes medias o bajas)</option>
+  </select>
+</div>
+
+  <!-- Grupo 222: Rumbo y velocidad -->
+  <div class="titulo">Grupo 222 — Rumbo y Velocidad</div>
+<div class="fila">
+  <label>Rumbo verdadero:</label>
+  <select id="rumbo1">
+    <option value="0">0.– Detenido</option>
+    <option value="1">1.– Noreste</option>
+    <option value="2">2.– Este</option>
+    <option value="3">3.– Sureste</option>
+    <option value="4">4.– Sur</option>
+    <option value="5">5.– Surweste</option>
+    <option value="6">6.– Weste</option>
+    <option value="7">7.– Norweste</option>
+    <option value="8">8.– Norte</option>
+    <option value="9">9.– Desconocido</option>
+    <option value="/">/.– Informe desde una estación costera o desplazamiento de la nave no reportado</option>
+  </select>
+</div>
+
+<div class="fila">
+  <label>Velocidad del buque:</label>
+  <select id="velocidad">
+    <option value="0">0.– 0 Nudos / 0 Kms/Hra.</option>
+    <option value="1">1.– 1-5 Nudos / 1-10 Kms/Hra.</option>
+    <option value="2">2.– 6-10 Nudos / 11-19 Kms/Hra.</option>
+    <option value="3">3.– 11-15 Nudos / 20-28 Kms/Hra.</option>
+    <option value="4">4.– 16-20 Nudos / 29-37 Kms/Hra.</option>
+    <option value="5">5.– 21-25 Nudos / 38-47 Kms/Hra.</option>
+    <option value="6">6.– 26-30 Nudos / 48-56 Kms/Hra.</option>
+    <option value="7">7.– 31-35 Nudos / 57-65 Kms/Hra.</option>
+    <option value="8">8.– 36-40 Nudos / 66-75 Kms/Hra.</option>
+    <option value="9">9.– Sobre 40 Nudos / sobre 75 Kms/Hra.</option>
+    <option value="/">/.– Informe desde una estación costera o desplazamiento del buque no reportado</option>
+  </select>
+</div>
+
+<!-- NUEVO GRUPO 2 — Olas de mar de viento -->
+<div class="titulo">Grupo 2 — Olas de mar de viento</div>
+<div class="fila">
+  <label>Indicativo de grupo:</label>
+  <input id="indicativo2" value="2" readonly>
+</div>
+<div class="fila">
+  <label>Período de las olas PwPw (s):</label>
+  <input id="olasPeriodo" placeholder="Ej: 06" maxlength="2">
+</div>
+<div class="fila">
+  <label>Altura de las olas HwHw (0,5 mts):</label>
+  <select id="olasAltura">
+    <option value="//">//.- No observado</option>
+    <option value="01">01.- 0,5 m</option>
+    <option value="02">02.- 1,0 m</option>
+    <option value="03">03.- 1,5 m</option>
+    <option value="04">04.- 2,0 m</option>
+    <option value="05">05.- 2,5 m</option>
+    <option value="06">06.- 3,0 m</option>
+    <option value="07">07.- 3,5 m</option>
+    <option value="08">08.- 4,0 m</option>
+    <option value="09">09.- 4,5 m</option>
+    <option value="10">10.- 5,0 m</option>
+    <option value="00">Mar calma</option>
+    <option value="299//">Imposible de medir</option>
+  </select>
+</div>
+<div class="detalle">
+  Nota 1: Este dato indica olas de mar de viento.<br>
+  Nota 2: 20000 = Mar calma · 299// = Imposible de medir · 2//// = No fue observado
+</div>
+
+  <!-- BOTONES -->
+  <div class="btns">
+    <button class="btn" id="guardarBtn">Guardar registro</button>
+    <button class="btn reiniciar" id="reiniciarBtn">Reiniciar historial</button>
+  </div>
+
+  <!-- RESULTADO -->
+  <div class="resultado">
+    <div class="codigo" id="codigo"></div>
+    <div class="detalle" id="detalle"></div>
+  </div>
+
+  <!-- HISTORIAL -->
+  <div class="titulo">Historial</div>
+  <div id="historial"></div>
+</div>
+
+<script>
+function $(id){ return document.getElementById(id); }
+
+// actualizar lat/lon codificadas
+function actualizarLatitud(){
+  const g = Number($('latGrados').value) || 0;
+  const m = Number($('latMinutos').value) || 0;
+  const dec = Math.floor(m/6);
+  $('latitud').value = '99' + String(g*10 + dec).padStart(3,'0');
+}
+function actualizarLongitud(){
+  const c = String($('cuadrante').value || '5');
+  const g = Number($('lonGrados').value) || 0;
+  const m = Number($('lonMinutos').value) || 0;
+  const dec = Math.floor(m/6);
+  $('longitud').value = c + '0' + String(g*10 + dec).padStart(3,'0');
+}
+
+// cálculo punto de rocío y humedad relativa
+function calcularPuntoRocio() {
+  const T = parseFloat($('tempSeco').value);
+  const Tw = parseFloat($('tempHumedo').value);
+  if (!Number.isFinite(T) || !Number.isFinite(Tw)) {
+    $('puntoRocio').value = '';
+    $('humRel').value = '';
+    return { Td: null, HR: null };
+  }
+  const P = 1013.25;
+  const A = 0.00066;
+  const es_Tw = 6.112 * Math.exp((17.67 * Tw) / (Tw + 243.5));
+  const e = es_Tw - A * P * (T - Tw);
+  const es_T = 6.112 * Math.exp((17.67 * T) / (T + 243.5));
+  const HR = Math.round(100 * (e / es_T));
+  const Td = (243.5 * Math.log(e / 6.112)) / (17.67 - Math.log(e / 6.112));
+  $('puntoRocio').value = Td.toFixed(1);
+  $('humRel').value = HR;
+  return { Td: Td, HR: HR };
+}
+
+// generar grupo 4 i B V V
+function generarGrupo4nav(){
+  const S = '4';
+  const I = String($('incluido').value || '1');
+  const B = String($('baseNube').value || '0').slice(-1);
+  const VV = String($('visibilidad').value || '00').padStart(2,'0').slice(-2);
+  return S + I + B + VV;
+}
+
+// generar Grupo 2 — Olas de mar de viento
+function generarGrupo2(){
+  const ind=$('indicativo2').value||'2';
+  const per=$('olasPeriodo').value.padStart(2,'0')||'//';
+  const alt=$('olasAltura').value||'//';
+  return ind+per+alt;
+}
+
+// generar código completo
+function generarCodigo(){
+  const sigla = $('sigla').value || 'BBXX';
+  const est = ($('estacion').value || '').toUpperCase();
+  if (!est || est.length !== 4) {
+    $('codigo').textContent = 'Ingrese estación válida (4 letras), ej: SCQQ';
+    $('detalle').textContent = '';
+    return '';
+  }
+  const dia = String(Number($('dia').value || 0)).padStart(2,'0');
+  const hora = String(Number($('hora').value || 0)).padStart(2,'0');
+  const i_w = $('unidadViento').value || '4';
+  const YYGGiw = dia + hora + i_w;
+
+  const lat = $('latitud').value;
+  const lon = $('longitud').value;
+  if (!lat || !lon) {
+    $('codigo').textContent = 'Introduce latitud y longitud válidas';
+    $('detalle').textContent = '';
+    return '';
+  }
+
+  const tdhr = calcularPuntoRocio();
+  const Td = (tdhr.Td !== null) ? tdhr.Td : 0;
+  const temp = Number($('tempSeco').value) || 0;
+
+  // Sección 5: Nubosidad y viento
+  const nubTotal = String($('vNubosidad').value || '0');
+  const dirViento = String($('vDireccion').value || '00').padStart(2,'0');
+  const intViento = String($('vIntensidad').value || '00').padStart(2,'0');
+  const g5v = nubTotal + dirViento + intViento;
+
+  const g1 = '1' + (temp < 0 ? '1' : '0') + String(Math.round(Math.abs(temp) * 10)).padStart(3,'0');
+  const g2 = '2' + (Td < 0 ? '1' : '0') + String(Math.round(Math.abs(Td) * 10)).padStart(3,'0');
+
+  const presEst = Number($('presEst').value) || 0;
+  const presMar = Number($('presMar').value) || 0;
+  const g3 = '3' + String(Math.round(presEst * 10)).padStart(4,'0').slice(-4);
+  const g4 = '4' + String(Math.round(presMar * 10)).padStart(4,'0').slice(-4);
+
+  const tendTipo = $('tendTipo').value || '4';
+  const tendValor = Number($('tendValor').value) || 0;
+  const g5 = '5' + tendTipo + String(Math.round(Math.abs(tendValor) * 10)).padStart(3,'0');
+
+  const grupo4nav = generarGrupo4nav();
+
+  // Sección 7
+  const ww = $('tiempoPresente').value || '00';
+  const W1 = String($('tiempoPasado1').value || '0');
+  const W2 = String($('tiempoPasado2').value || '0');
+  const g7 = '7' + ww + W1 + W2;
+
+// Sección 8 — Nubosidad
+const N = String($('nubN').value || '0');
+const CL = String($('NubesBajas').value || '0');
+const CM = String($('NubesMedias').value || '0');
+const CH = String($('NubesAltas').value || '0');
+const g8 = '8' + N + CL + CM + CH;
+
+// Grupo 222 — Rumbo y velocidad
+const rumbo = $('rumbo1').value || '0';
+const vel = $('velocidad').value || '0';
+const g222 = '222' + rumbo + vel;
+
+const g2Olas = generarGrupo2();
+
+  const codigoCompleto = [
+      sigla, est, YYGGiw, lat, lon, grupo4nav,
+      g5v, g1, g2, g3, g4, g5, g7, g8, g222, g2Olas
+  ].join(' ');
+
+  $('codigo').textContent = codigoCompleto;
+  $('detalle').textContent = (tdhr.Td !== null) ? `Punto de rocío: ${tdhr.Td.toFixed(1)} °C · Humedad relativa: ${tdhr.HR}%` : '';
+
+  return codigoCompleto;
+}
+
+// listeners para inputs
+const autoIds = [
+  'latGrados','latMinutos','lonGrados','lonMinutos','cuadrante',
+  'tempSeco','tempHumedo','presEst','presMar','tendValor',
+  'dia','hora','estacion','unidadViento','tendTipo','tiempoPresente',
+  'tiempoPasado1','tiempoPasado2','nubN','NubesBajas','NubesMedias','NubesAltas',
+  'incluido','baseNube','visibilidad','vNubosidad','vDireccion','vIntensidad',
+  'olasPeriodo','olasAltura'
+];
+autoIds.forEach(id => {
+  const el = $(id);
+  if (!el) return;
+  el.addEventListener('input', () => {
+    if(['latGrados','latMinutos'].includes(id)) actualizarLatitud();
+    if(['lonGrados','lonMinutos','cuadrante'].includes(id)) actualizarLongitud();
+    if(['tempSeco','tempHumedo'].includes(id)) calcularPuntoRocio();
+    generarCodigo();
+  });
+});
+
+// Guardar observación
+$('guardarBtn').addEventListener('click',()=>{
+  const codigo=generarCodigo();
+  let hist=JSON.parse(localStorage.getItem('historialSHIP'))||[];
+  hist.unshift({codigo,fecha:new Date().toLocaleString()});
+  localStorage.setItem('historialSHIP',JSON.stringify(hist));
+  mostrarHistorial();
+});
+
+$('reiniciarBtn').addEventListener('click',()=>{
+  if(confirm('¿Deseas borrar todo el historial y reiniciar el formulario?')){
+    localStorage.removeItem('historialSHIP');
+    document.querySelectorAll('input,select').forEach(el=>{
+      if(!el.readOnly) el.value='';
+    });
+    $('sigla').value='BBXX';
+    $('indicativo2').value='2';
+    $('codigo').textContent='';
+    $('detalle').textContent='';
+    $('historial').innerHTML='';
+    alert('Historial borrado correctamente.');
+  }
+});
+
+
+// Mostrar historial
+function mostrarHistorial(){
+  const hist=JSON.parse(localStorage.getItem('historialSHIP'))||[];
+  $('historial').innerHTML='';
+  hist.forEach(h=>{
+    const div=document.createElement('div');
+    div.style.marginBottom='10px';
+    div.innerHTML=`<b>${h.fecha}</b><br><span class="codigo">${h.codigo}</span>`;
+    $('historial').appendChild(div);
+  });
+}
+
+// generar código inicial al cargar
+window.addEventListener('load',()=>{
+  generarCodigo();
+  mostrarHistorial();
+});
+</script>
+</body>
+</html>
