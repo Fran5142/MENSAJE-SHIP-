@@ -155,38 +155,27 @@
     }
   }
 
- /* ===== Ajustes extra para móviles pequeños ===== */
-@media (max-width: 380px) {
-  .contenedor {
-    padding: 8px;
+  /* Adaptación extra para pantallas muy pequeñas (celulares chicos) */
+  @media (max-width: 480px) {
+    .titulo {
+      font-size: 16px;
+    }
+
+    .fila label {
+      font-size: 14px;
+    }
+
+    .fila input,
+    .fila select {
+      font-size: 14px;
+      padding: 7px;
+    }
+
+    .btn {
+      font-size: 14px;
+      padding: 9px;
+    }
   }
-
-  .fila label {
-    font-size: 13px;
-  }
-
-  .fila input,
-  .fila select {
-    font-size: 13px;
-    padding: 6px;
-  }
-
-  h1 {
-    font-size: 1.2em;
-  }
-
-  .btn {
-    font-size: 13px;
-    padding: 8px;
-  }
-}
-
-/* Evita desbordes horizontales en móviles */
-html, body {
-  max-width: 100%;
-  overflow-x: hidden;
-}
-
 </style>
 </head>
 <body>
@@ -609,6 +598,54 @@ html, body {
   Nota 2: 20000 = Mar calma · 299// = Imposible de medir · 2//// = No fue observado
 </div>
 
+<!-- Grupo 3 — Dirección del mar de fondo -->
+<div class="titulo">Grupo 3 — Dirección del mar de fondo</div>
+<div class="fila">
+  <label>Dirección del mar de fondo:</label>
+  <select id="grupo3">
+    <option value="00">00.- Calma</option>
+    <option value="01">01.- 05° a 14°</option>
+    <option value="02">02.- 15° a 24°</option>
+    <option value="03">03.- 25° a 34°</option>
+    <option value="04">04.- 35° a 44°</option>
+    <option value="05">05.- 45° a 54°</option>
+    <option value="06">06.- 55° a 64°</option>
+    <option value="07">07.- 65° a 74°</option>
+    <option value="08">08.- 75° a 84°</option>
+    <option value="09">09.- 85° a 94°</option>
+    <option value="10">10.- 95° a 104°</option>
+    <option value="11">11.- 105° a 114°</option>
+    <option value="12">12.- 115° a 124°</option>
+    <option value="13">13.- 125° a 134°</option>
+    <option value="14">14.- 135° a 144°</option>
+    <option value="15">15.- 145° a 154°</option>
+    <option value="16">16.- 155° a 164°</option>
+    <option value="17">17.- 165° a 174°</option>
+    <option value="18">18.- 175° a 184°</option>
+    <option value="19">19.- 185° a 194°</option>
+    <option value="20">20.- 195° a 204°</option>
+    <option value="21">21.- 205° a 214°</option>
+    <option value="22">22.- 215° a 224°</option>
+    <option value="23">23.- 225° a 234°</option>
+    <option value="24">24.- 235° a 244°</option>
+    <option value="25">25.- 245° a 254°</option>
+    <option value="26">26.- 255° a 264°</option>
+    <option value="27">27.- 265° a 274°</option>
+    <option value="28">28.- 275° a 284°</option>
+    <option value="29">29.- 285° a 294°</option>
+    <option value="30">30.- 295° a 304°</option>
+    <option value="31">31.- 305° a 314°</option>
+    <option value="32">32.- 315° a 324°</option>
+    <option value="33">33.- 325° a 334°</option>
+    <option value="34">34.- 335° a 344°</option>
+    <option value="35">35.- 345° a 354°</option>
+    <option value="36">36.- 350° a 360°</option>
+    <option value="99">99.- Dirección de conocido </option>
+  </select>
+</div>
+
+
+
   <!-- BOTONES -->
   <div class="btns">
     <button class="btn" id="guardarBtn">Guardar registro</button>
@@ -677,10 +714,49 @@ function generarGrupo4nav(){
 // generar Grupo 2 — Olas de mar de viento
 function generarGrupo2(){
   const ind=$('indicativo2').value||'2';
-  const per=$('olasPeriodo').value.padStart(2,'0')||'//';
+  const per=(String($('olasPeriodo').value||'').trim()).padStart(2,'0') || '//';
   const alt=$('olasAltura').value||'//';
-  return ind+per+alt;
+  return ind + per + alt;
 }
+
+// Grupo 3 — Dirección mar de fondo
+function generarGrupo3(){
+  const valor = $('grupo3').value || '00';
+  return '3' + valor + '//';
+}
+
+const g3Dir = generarGrupo3();
+
+ let registros = [
+      "BBXX 5555 15154",
+      "99447 50559",
+      "22252 301// 20202"
+    ];
+
+    // Filtrar el registro 301//
+    let registro301 = registros.filter(r => r.includes("301//"));
+    let otrosRegistros = registros.filter(r => !r.includes("301//"));
+
+    // Poner el registro 301// al final
+    let registrosFinales = [...otrosRegistros, ...registro301];
+
+
+// --- Mostrar historial ---
+function mostrarHistorial(){
+  const hist=JSON.parse(localStorage.getItem('historialSHIP'))||[];
+  const container = $('historial');
+  container.innerHTML='';
+  hist.forEach(h=>{
+    const div=document.createElement('div');
+    div.style.padding='6px 4px';
+    div.style.borderBottom='1px solid #ccc';
+    div.textContent=`[${h.fecha}] ${h.codigo}`;
+    container.appendChild(div);
+  });
+}
+
+// Mostrar historial al cargar la página
+document.addEventListener('DOMContentLoaded', mostrarHistorial);
 
 // generar código completo
 function generarCodigo(){
@@ -734,23 +810,27 @@ function generarCodigo(){
   const W2 = String($('tiempoPasado2').value || '0');
   const g7 = '7' + ww + W1 + W2;
 
-// Sección 8 — Nubosidad
-const N = String($('nubN').value || '0');
-const CL = String($('NubesBajas').value || '0');
-const CM = String($('NubesMedias').value || '0');
-const CH = String($('NubesAltas').value || '0');
-const g8 = '8' + N + CL + CM + CH;
+  // Sección 8 — Nubosidad
+  const N = String($('nubN').value || '0');
+  const CL = String($('NubesBajas').value || '0');
+  const CM = String($('NubesMedias').value || '0');
+  const CH = String($('NubesAltas').value || '0');
+  const g8 = '8' + N + CL + CM + CH;
 
-// Grupo 222 — Rumbo y velocidad
-const rumbo = $('rumbo1').value || '0';
-const vel = $('velocidad').value || '0';
-const g222 = '222' + rumbo + vel;
+  // Grupo 222 — Rumbo y velocidad
+  const rumbo = $('rumbo1').value || '0';
+  const vel = $('velocidad').value || '0';
+  const g222 = '222' + rumbo + vel;
 
-const g2Olas = generarGrupo2();
+  // Grupo 2 — Olas
+  const g2Olas = generarGrupo2();
+
+  // Grupo 3 — Dirección mar de fondo
+  const g3Dir = generarGrupo3();
 
   const codigoCompleto = [
       sigla, est, YYGGiw, lat, lon, grupo4nav,
-      g5v, g1, g2, g3, g4, g5, g7, g8, g222, g2Olas
+      g5v, g1, g2, g3, g4, g5, g7, g8, g222, g2Olas, g3Dir
   ].join(' ');
 
   $('codigo').textContent = codigoCompleto;
@@ -766,7 +846,7 @@ const autoIds = [
   'dia','hora','estacion','unidadViento','tendTipo','tiempoPresente',
   'tiempoPasado1','tiempoPasado2','nubN','NubesBajas','NubesMedias','NubesAltas',
   'incluido','baseNube','visibilidad','vNubosidad','vDireccion','vIntensidad',
-  'olasPeriodo','olasAltura'
+  'olasPeriodo','olasAltura','grupo3_input'
 ];
 autoIds.forEach(id => {
   const el = $(id);
@@ -780,15 +860,17 @@ autoIds.forEach(id => {
 });
 
 // Guardar observación
-$('guardarBtn').addEventListener('click',()=>{
+$('guardarBtn').addEventListener('click', (ev) => {
+  ev.preventDefault();
   const codigo=generarCodigo();
   let hist=JSON.parse(localStorage.getItem('historialSHIP'))||[];
   hist.unshift({codigo,fecha:new Date().toLocaleString()});
   localStorage.setItem('historialSHIP',JSON.stringify(hist));
   mostrarHistorial();
+  alert('Registro guardado correctamente.');
 });
 
-$('reiniciarBtn').addEventListener('click',()=>{
+$('reiniciarBtn').addEventListener('click',()=>{ 
   if(confirm('¿Deseas borrar todo el historial y reiniciar el formulario?')){
     localStorage.removeItem('historialSHIP');
     document.querySelectorAll('input,select').forEach(el=>{
@@ -796,8 +878,14 @@ $('reiniciarBtn').addEventListener('click',()=>{
     });
     $('sigla').value='BBXX';
     $('indicativo2').value='2';
+    $('indicativo3').value='3';
     $('codigo').textContent='';
     $('detalle').textContent='';
+actualizarLatitud();
+actualizarLongitud();
+generarGrupo3();
+generarCodigo();
+mostrarHistorial();
     $('historial').innerHTML='';
     alert('Historial borrado correctamente.');
   }
