@@ -185,7 +185,7 @@
   <!-- Encabezado y datos básicos -->
   <div class="titulo">Encabezado SHIP</div>
   <div class="fila"><label>Inicio:</label><input id="sigla" value="BBXX" readonly></div>
-  <div class="fila"><label>Sigla Buque:</label><input id="estacion" maxlength="4" placeholder="Ej: SCQQ" style="text-transform:uppercase"></div>
+  <div class="fila"><label>Sigla Buque:</label><input id="estacion" maxlength="4" placeholder="Ej: CCOT" style="text-transform:uppercase"></div>
   <div class="fila"><label>Día (DD):</label><input id="dia" type="number" min="1" max="31"></div>
   <div class="fila"><label>Hora UTC (HH):</label><input id="hora" type="number" min="0" max="23"></div>
   <div class="fila"><label>Indicador de viento:</label>
@@ -218,14 +218,14 @@
   <div class="fila"><label>Longitud codificada (50XXX):</label><input id="longitud" readonly></div>
 
   <!-- Grupo 4 i B V V -->
-  <div class="titulo">Grupo Visibilidad</div>
+  <div class="titulo">Grupo Visibilidad y Altura nubosa </div>
   <div class="fila"><label>Inclusión / omisión:</label>
     <select id="incluido">
       <option value="1">1 – Incluido (Con Fenómenos)</option>
       <option value="2">2 – Omitido (Sin Fenómenos)</option>
     </select>
   </div>
-  <div class="fila"><label>Base nubosidad (1 díg):</label>
+  <div class="fila"><label>Base nubosidad:</label>
     <select id="baseNube">
       <option value="0">0.- 0 a 49 metros</option>
       <option value="1">1.- 50 a 99 metros</option>
@@ -240,7 +240,7 @@
       <option value="/">/.- Altura de la base nubosa desconocida</option>
     </select>
   </div>
-  <div class="fila"><label>Visibilidad (2 dígitos):</label>
+  <div class="fila"><label>Visibilidad:</label>
     <select id="visibilidad">
       <option value="90">90.- menos de 50 mts</option>
       <option value="91">91.- 50 mts</option>
@@ -254,14 +254,14 @@
     </select>
   </div>
 
-  <!-- NUEVA SECCIÓN 5: Octas, nubosidad total y Viento -->
-  <div class="titulo">Grupo Octas, Nubosidad total y Viento</div>
+  <!-- NUEVA SECCIÓN 5: Octas y  Dirección He intensidad Del viento -->
+  <div class="titulo">Grupo Octas y  Dirección He intensidad Del viento</div>
   <div class="fila"><label>Octas total de nubes (0-8):</label><input id="vNubosidad" type="number" min="0" max="8" placeholder="Ej: 5"></div>
   <div class="fila"><label>Dirección del viento:</label><input id="vDireccion" type="number" min="0" max="36" placeholder="Ej: 13"></div>
   <div class="fila"><label>Intensidad del viento:</label><input id="vIntensidad" type="number" min="0" max="99" placeholder="Ej: 12"></div>
 
-  <!-- Temperaturas y humedad -->
-  <div class="titulo">Sección 1 y 2 — Temperaturas y humedad</div>
+  <!-- Temperaturas y Punto de Rocío -->
+  <div class="titulo">Sección 1 y 2 — Temperaturas y Punto de Rocío</div>
   <div class="fila"><label>Temperatura seca (°C):</label><input id="tempSeco" type="number" step="0.1" placeholder="Ej: 8.8"></div>
   <div class="fila"><label>Temperatura húmeda (°C):</label><input id="tempHumedo" type="number" step="0.1" placeholder="Ej: 8.0"></div>
   <div class="fila"><label>Punto de rocío (°C):</label><input id="puntoRocio" readonly></div>
@@ -271,8 +271,8 @@
   <div class="titulo">Sección 3, 4 y 5 — Presión y tendencia</div>
   <div class="fila"><label>Presión estación (hPa):</label><input id="presEst" type="number" step="0.1"></div>
   <div class="fila"><label>Presión nivel mar (hPa):</label><input id="presMar" type="number" step="0.1"></div>
-  <div class="fila"><label>Tendencia (5a):</label>
-    <select id="tendTipo"><option value="2">2</option><option value="4">4</option><option value="7">7</option></select>
+  <div class="fila"><label>Tendencia:</label>
+    <select id="tendTipo"><option value="2">2.- Subiendo</option><option value="4">4.- Estacionaria</option><option value="7">7.- Bajando</option></select>
   </div>
   <div class="fila"><label>Valor cambio presión (hPa):</label><input id="tendValor" type="number" step="0.1"></div>
 
@@ -462,7 +462,7 @@
 
 <!-- Sección 8 — Nubosidad -->
 <div class="titulo">Sección 8 — Nubosidad</div>
-<div class="fila"><label>Nubosidad total (N):</label>
+<div class="fila"><label>Nubosidad total:</label>
   <select id="nubN">
     <option value="0">0/8</option>
     <option value="1">1/8</option>
@@ -572,11 +572,11 @@
   <input id="indicativo2" value="2" readonly>
 </div>
 <div class="fila">
-  <label>Período de las olas PwPw (s):</label>
+  <label>Período de las olas (s):</label>
   <input id="olasPeriodo" placeholder="Ej: 06" maxlength="2">
 </div>
 <div class="fila">
-  <label>Altura de las olas HwHw (0,5 mts):</label>
+  <label>Altura de las olas:</label>
   <select id="olasAltura">
     <option value="//">//.- No observado</option>
     <option value="01">01.- 0,5 m</option>
@@ -739,7 +739,6 @@ const g3Dir = generarGrupo3();
 
     // Poner el registro 301// al final
     let registrosFinales = [...otrosRegistros, ...registro301];
-
 
 // --- Mostrar historial ---
 function mostrarHistorial(){
